@@ -1,0 +1,352 @@
+
+/* ==========================================================
+   Portable Callouts + Icons for VS Code Markdown
+   (No Obsidian/admonition/GitHub dependencies)
+
+   Author callouts directly as HTML in your Markdown, e.g.:
+
+     <div class="callout warning">
+       <div class="callout-title">Warning</div>
+       <div class="callout-body">
+         <p>Something important...</p>
+       </div>
+     </div>
+
+   Supported type classes:
+   note, info, tip, hint, success, warning, caution, danger, error,
+   important, question, help, faq, example, quote, cite,
+   abstract, summary, tldr, bug, failure, fail, missing
+   ========================================================== */
+
+/* ---- Base tokens (light mode) ---- */
+:root {
+  --callout-radius: 10px;
+  --callout-border-w: 7px;
+  --callout-pad-y: 0.85rem;
+  --callout-pad-x: 1rem;
+
+  --callout-title-size: 0.95rem;
+  --callout-title-weight: 750;
+  --callout-body-size: 1rem;
+  --callout-line-height: 1.5;
+
+  --callout-text: #1f2328;
+  --callout-muted: rgba(31, 35, 40, 0.75);
+
+  --callout-shadow: 0 1px 0 rgba(0,0,0,0.04);
+
+  /* Inline code inside callouts */
+  --callout-code-bg: rgba(0, 0, 0, 0.05);
+  --callout-code-border: rgba(0, 0, 0, 0.12);
+
+  /* Pre/code blocks inside callouts */
+  --callout-pre-bg: rgba(0, 0, 0, 0.04);
+  --callout-pre-border: rgba(0, 0, 0, 0.12);
+
+  /* Defaults if no type class is provided */
+  --callout-accent: #2f80ed; /* blue */
+  --callout-bg: #f0f6ff;     /* pale blue */
+  --callout-title: #1b4f9c;  /* darker blue */
+
+  /* Default icon (fallback) — circle-i */
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M12%202a10%2010%200%201%200%200%2020a10%2010%200%200%200%200-20zm1%2015h-2v-6h2v6zm0-8h-2V7h2v2z%27/%3E%3C/svg%3E");
+}
+
+/* ---- Optional dark mode (helps in VS Code preview; PDF may still be light) ---- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --callout-text: #e6edf3;
+    --callout-muted: rgba(230, 237, 243, 0.78);
+
+    --callout-shadow: 0 1px 0 rgba(255,255,255,0.06);
+
+    --callout-code-bg: rgba(255, 255, 255, 0.09);
+    --callout-code-border: rgba(255, 255, 255, 0.16);
+
+    --callout-pre-bg: rgba(255, 255, 255, 0.07);
+    --callout-pre-border: rgba(255, 255, 255, 0.16);
+
+    --callout-accent: #4ea1ff;
+    --callout-bg: rgba(78, 161, 255, 0.14);
+    --callout-title: #a9d1ff;
+  }
+}
+
+/* ==========================================================
+   Base Callout Layout
+   ========================================================== */
+
+.callout {
+  background: var(--callout-bg);
+  color: var(--callout-text);
+  border-left: var(--callout-border-w) solid var(--callout-accent);
+  border-radius: var(--callout-radius);
+  padding: var(--callout-pad-y) var(--callout-pad-x);
+  margin: 1rem 0;
+  box-sizing: border-box;
+  box-shadow: var(--callout-shadow);
+
+  /* PDF friendliness */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.callout-title {
+  color: var(--callout-title);
+  font-weight: var(--callout-title-weight);
+  font-size: var(--callout-title-size);
+  line-height: 1.2;
+  margin: 0 0 0.55rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.callout-body {
+  font-size: var(--callout-body-size);
+  line-height: var(--callout-line-height);
+}
+
+/* Remove awkward top/bottom margins inside */
+.callout-body > :first-child { margin-top: 0; }
+.callout-body > :last-child  { margin-bottom: 0; }
+
+/* Paragraphs */
+.callout p { margin: 0.5rem 0; }
+
+/* Lists */
+.callout ul, .callout ol { margin: 0.5rem 0 0.5rem 1.25rem; }
+.callout li { margin: 0.25rem 0; }
+
+/* Links */
+.callout a {
+  color: var(--callout-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Inline code */
+.callout code {
+  background: var(--callout-code-bg);
+  border: 1px solid var(--callout-code-border);
+  border-radius: 6px;
+  padding: 0.05em 0.35em;
+  font-size: 0.95em;
+}
+
+/* Code blocks */
+.callout pre {
+  background: var(--callout-pre-bg);
+  border: 1px solid var(--callout-pre-border);
+  border-radius: 10px;
+  padding: 0.75rem 0.85rem;
+  overflow: auto;
+  margin: 0.65rem 0;
+}
+
+/* Tables */
+.callout table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.65rem 0;
+}
+
+.callout th, .callout td {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0.4rem 0.55rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .callout th, .callout td {
+    border-color: rgba(255, 255, 255, 0.16);
+  }
+}
+
+/* Blockquotes within callouts */
+.callout blockquote {
+  margin: 0.6rem 0;
+  padding: 0.35rem 0.85rem;
+  border-left: 4px solid rgba(0, 0, 0, 0.15);
+  opacity: 0.95;
+}
+@media (prefers-color-scheme: dark) {
+  .callout blockquote {
+    border-left-color: rgba(255, 255, 255, 0.18);
+  }
+}
+
+/* ==========================================================
+   ICONS (SVG) 
+   Uses mask-image so the icon is tinted by --callout-accent
+   ========================================================== */
+
+.callout-title::before {
+  content: "";
+  width: 1.15em;
+  height: 1.15em;
+  display: inline-block;
+  flex: 0 0 auto;
+
+  /* icon tint */
+  background-color: var(--callout-accent);
+
+  /* masked silhouette */
+  -webkit-mask: var(--callout-icon) no-repeat center / contain;
+  mask: var(--callout-icon) no-repeat center / contain;
+
+  opacity: 0.95;
+}
+
+/* ==========================================================
+   Type Palettes (De-facto)
+   Sets:
+     --callout-accent (border + links + icon tint)
+     --callout-bg (background tint)
+     --callout-title (title color)
+     --callout-icon (type-specific SVG)
+   ========================================================== */
+
+/* NOTE */
+.callout.note {
+  --callout-accent: #2f80ed;
+  --callout-bg: #f0f6ff;
+  --callout-title: #1b4f9c;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M12%202a10%2010%200%201%200%200%2020a10%2010%200%200%200%200-20zm1%2015h-2v-6h2v6zm0-8h-2V7h2v2z%27/%3E%3C/svg%3E");
+}
+
+/* INFO */
+.callout.info {
+  --callout-accent: #17a2b8;
+  --callout-bg: #eaf7fa;
+  --callout-title: #0f6b79;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M12%202a10%2010%200%201%200%200%2020a10%2010%200%200%200%200-20zm1%2015h-2v-7h2v7zm0-9h-2V7h2v1z%27/%3E%3C/svg%3E");
+}
+
+/* TIP / HINT */
+.callout.tip,
+.callout.hint {
+  --callout-accent: #2ecc71;
+  --callout-bg: #eafaf1;
+  --callout-title: #1f7f46;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M12%201a7%207%200%200%200-4%2012.74V17a1%201%200%200%200%201%201h6a1%201%200%200%200%201-1v-3.26A7%207%200%200%200%2012%201zm3%2011.36L14%2013.1V16h-4v-2.9l-1-.74A5%205%200%201%201%2015%2012.36z%27/%3E%3C/svg%3E");
+}
+
+/* SUCCESS */
+.callout.success {
+  --callout-accent: #28a745;
+  --callout-bg: #edf9f0;
+  --callout-title: #1d6b2d;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M12%202a10%2010%200%201%200%200%2020a10%2010%200%200%200%200-20zm-1%2014l-4-4l1.4-1.4L11%2013.2l5.6-5.6L18%209l-7%207z%27/%3E%3C/svg%3E");
+}
+
+/* WARNING */
+.callout.warning {
+  --callout-accent: #f39c12;
+  --callout-bg: #fff6e5;
+  --callout-title: #9a5f00;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M1%2021h22L12%202%201%2021zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z%27/%3E%3C/svg%3E");
+}
+
+/* CAUTION */
+.callout.caution {
+  --callout-accent: #f1c40f;
+  --callout-bg: #fffbe5;
+  --callout-title: #8a6a00;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M1%2021h22L12%202%201%2021zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z%27/%3E%3C/svg%3E");
+}
+
+/* DANGER */
+.callout.danger {
+  --callout-accent: #e74c3c;
+  --callout-bg: #fdecea;
+  --callout-title: #9b2b22;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M7%202h10l5%205v10l-5%205H7l-5-5V7l5-5zm8.4%2015L12%2013.6%208.6%2017%207%2015.4%2010.4%2012%207%208.6%208.6%207%2012%2010.4%2015.4%207%2017%208.6%2013.6%2012%2017%2015.4%2015.4%2017z%27/%3E%3C/svg%3E");
+}
+
+/* ERROR */
+.callout.error {
+  --callout-accent: #c0392b;
+  --callout-bg: #fcebea;
+  --callout-title: #7f231a;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M7%202h10l5%205v10l-5%205H7l-5-5V7l5-5zm8.4%2015L12%2013.6%208.6%2017%207%2015.4%2010.4%2012%207%208.6%208.6%207%2012%2010.4%2015.4%207%2017%208.6%2013.6%2012%2017%2015.4%2015.4%2017z%27/%3E%3C/svg%3E");
+}
+
+/* IMPORTANT */
+.callout.important {
+  --callout-accent: #9b59b6;
+  --callout-bg: #f5eafa;
+  --callout-title: #5f2f74;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M6%202h12v20l-6-4-6%204V2zm7%2013h-2V7h2v8zm0%202h-2v-2h2v2z%27/%3E%3C/svg%3E");
+}
+
+/* QUESTION / HELP / FAQ */
+.callout.question,
+.callout.help,
+.callout.faq {
+  --callout-accent: #3498db;
+  --callout-bg: #eef7ff;
+  --callout-title: #1d5f8e;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M12%202a10%2010%200%201%200%200%2020a10%2010%200%200%200%200-20zm1%2016h-2v-2h2v2zm2.1-7.5l-.9.9c-.7.6-1.2%201.2-1.2%202.6h-2v-.5c0-1.1.5-2.1%201.2-2.8l1.2-1.2c.3-.3.5-.7.5-1.2a2%202%200%200%200-4%200H8a4%204%200%201%201%207.1%202.5z%27/%3E%3C/svg%3E");
+}
+
+/* EXAMPLE */
+.callout.example {
+  --callout-accent: #1abc9c;
+  --callout-bg: #e8fbf7;
+  --callout-title: #117a66;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M6%202h12v2h-1v4.6l3.7%206.4A4%204%200%200%201%2017.2%2021H6.8a4%204%200%200%201-3.5-6l3.7-6.4V4H6V2zm9%202H9v5.1L5.2%2015.7A2%202%200%200%200%206.8%2019h10.4a2%202%200%200%200%201.7-3L15%209.1V4z%27/%3E%3C/svg%3E");
+}
+
+/* QUOTE / CITE */
+.callout.quote,
+.callout.cite {
+  --callout-accent: #7f8c8d;
+  --callout-bg: #f4f6f7;
+  --callout-title: #4e5a5b;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M7.2%2017H4a3%203%200%200%201-3-3V9a3%203%200%200%201%203-3h4v2H4a1%201%200%200%200-1%201v5a1%201%200%200%200%201%201h3.2v2zM23%2017h-3.2v-2H23a1%201%200%200%200%201-1V9a1%201%200%200%200-1-1h-4V6h4a3%203%200%200%201%203%203v5a3%203%200%200%201-3%203z%27/%3E%3C/svg%3E");
+}
+
+/* ABSTRACT / SUMMARY / TLDR */
+.callout.abstract,
+.callout.summary,
+.callout.tldr {
+  --callout-accent: #6c5ce7;
+  --callout-bg: #f1efff;
+  --callout-title: #3f33a6;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M6%202h9l3%203v17H6V2zm8%201.5V6h2.5L14%203.5zM8%209h8v2H8V9zm0%204h8v2H8v-2zm0%204h6v2H8v-2z%27/%3E%3C/svg%3E");
+}
+
+/* BUG */
+.callout.bug {
+  --callout-accent: #8e44ad;
+  --callout-bg: #f6ecfb;
+  --callout-title: #55266a;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M20%208h-3.1A6%206%200%200%200%2013%206.1V4h2V2H9v2h2v2.1A6%206%200%200%200%207.1%208H4v2h2.3c-.2.6-.3%201.3-.3%202v1H4v2h2v1c0%20.7.1%201.4.3%202H4v2h3.1A6%206%200%200%200%2018%2020h2v-2h-2.3c.2-.6.3-1.3.3-2v-1h2v-2h-2v-1c0-.7-.1-1.4-.3-2H20V8zM12%2020a4%204%200%200%201-4-4v-4a4%204%200%200%201%208%200v4a4%204%200%200%201-4%204z%27/%3E%3C/svg%3E");
+}
+
+/* FAILURE / FAIL / MISSING */
+.callout.failure,
+.callout.fail,
+.callout.missing {
+  --callout-accent: #d35400;
+  --callout-bg: #fff0e5;
+  --callout-title: #7a3200;
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M12%202a10%2010%200%201%200%200%2020a10%2010%200%200%200%200-20zm3.5%2013.1L15.1%2016.5%2012%2013.4%208.9%2016.5%207.5%2015.1%2010.6%2012%207.5%208.9%208.9%207.5%2012%2010.6%2015.1%207.5%2016.5%208.9%2013.4%2012l3.1%203.1z%27/%3E%3C/svg%3E");
+}
+
+/* ==========================================================
+   Print / PDF adjustments
+   ========================================================== */
+@media print {
+  .callout {
+    margin: 0.85rem 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Helps icons render consistently in PDF engines */
+  .callout-title::before {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
